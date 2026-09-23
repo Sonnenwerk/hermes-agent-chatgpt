@@ -1783,7 +1783,12 @@ export const ja = defineLocale({
     noModelUsage: 'モデルの使用履歴はまだありません。',
     topSkills: 'よく使うスキル',
     noSkillActivity: 'スキルのアクティビティはまだありません。',
-    actions: count => `${count} アクション`
+    actions: count => `${count} アクション`,
+    logSearchPlaceholder: 'ログを検索…',
+    logTop: '先頭',
+    logPageUp: '1ページ上',
+    logPageDown: '1ページ下',
+    logBottom: '末尾'
   },
 
   messaging: {
