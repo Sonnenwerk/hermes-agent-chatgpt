@@ -803,7 +803,7 @@ async def get_logs(
     file: str = "agent", lines: int = 100, level: Optional[str] = None,
     component: Optional[str] = None, search: Optional[str] = None,
     profile: Optional[str] = None):
-    from hermes_cli.logs import _read_tail, LOG_FILES
+    from hermes_cli.logs import _read_tail, _structure_log_lines, LOG_FILES
     log_name = LOG_FILES.get(file)
     if not log_name:
         raise HTTPException(status_code=400, detail=f"Unknown log file: {file}")
@@ -838,4 +838,4 @@ async def get_logs(
         return result
 
     result = await asyncio.to_thread(_load_logs)
-    return {"file": file, "lines": result}
+    return {"file": file, "lines": result, "entries": _structure_log_lines(result)}
