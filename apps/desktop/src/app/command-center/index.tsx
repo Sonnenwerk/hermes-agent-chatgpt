@@ -333,13 +333,12 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
 
         <OverlayMain>
           <header className="mb-4 flex items-center justify-between gap-3 max-[47.5rem]:mb-2">
-            {/* Redundant on narrow — the nav dropdown already names the section. */}
             <div className="min-w-0 max-[47.5rem]:hidden">
               <h2 className="text-[length:var(--conversation-text-font-size)] font-semibold text-foreground">
-                {cc.sections[section]}
+                {cc.commandCenter}
               </h2>
               <p className="mt-0.5 text-[length:var(--conversation-caption-font-size)] leading-(--conversation-caption-line-height) text-(--ui-text-tertiary)">
-                {cc.sectionDescriptions[section]}
+                {cc.sections[section]} · {cc.sectionDescriptions[section]}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -349,6 +348,14 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
                   onChange={next => setQuery(next)}
                   placeholder={cc.searchPlaceholder}
                   value={query}
+                />
+              )}
+              {section === 'system' && (
+                <SearchField
+                  containerClassName="max-w-[40vw]"
+                  onChange={next => setLogQuery(next)}
+                  placeholder={cc.logSearchPlaceholder}
+                  value={logQuery}
                 />
               )}
               {section === 'usage' && (
@@ -489,12 +496,6 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
                         label: value === 'ALL' ? 'all' : value.toLowerCase()
                       }))}
                       value={logLevel}
-                    />
-                    <SearchField
-                      containerClassName="w-44"
-                      onChange={next => setLogQuery(next)}
-                      placeholder={cc.logSearchPlaceholder}
-                      value={logQuery}
                     />
                   </div>
                   {systemError && (
