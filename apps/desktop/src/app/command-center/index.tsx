@@ -37,7 +37,9 @@ import { $sessions, sessionPinId } from '@/store/session'
 import { confirmSharedGatewayRestart } from '@/store/system-actions'
 
 import { useRefreshHotkey } from '../hooks/use-refresh-hotkey'
+import { PAGE_INSET_X } from '../layout-constants'
 import { useRouteEnumParam } from '../hooks/use-route-enum-param'
+import { OverlayBreadcrumbHeader } from '../overlays/overlay-breadcrumb-header'
 import { OverlayMain, OverlayNav, OverlaySplitLayout } from '../overlays/overlay-split-layout'
 import { OverlayView } from '../overlays/overlay-view'
 
@@ -327,49 +329,48 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
     [cc, section, setSection]
   )
 
+  const activeGroup = navGroups.find(group => group.active)
+
   return (
     <OverlayView closeLabel={cc.close} onClose={onClose}>
       <OverlaySplitLayout>
         <OverlayNav groups={navGroups} />
 
-        <OverlayMain>
-          <header className="mb-4 flex items-center justify-between gap-3 max-[47.5rem]:mb-2">
-            {/* Redundant on narrow — the nav dropdown already names the section. */}
-            <div className="min-w-0 max-[47.5rem]:hidden">
-              <h2 className="text-[length:var(--conversation-text-font-size)] font-semibold text-foreground">
-                {cc.sections[section]}
-              </h2>
-              <p className="mt-0.5 text-[length:var(--conversation-caption-font-size)] leading-(--conversation-caption-line-height) text-(--ui-text-tertiary)">
-                {cc.sectionDescriptions[section]}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {section === 'sessions' && (
-                <SearchField
-                  containerClassName="max-w-[40vw]"
-                  onChange={next => setQuery(next)}
-                  placeholder={cc.searchPlaceholder}
-                  value={query}
-                />
-              )}
-              {section === 'system' && (
-                <SearchField
-                  containerClassName="max-w-[40vw]"
-                  onChange={next => setLogQuery(next)}
-                  placeholder={cc.logSearchPlaceholder}
-                  value={logQuery}
-                />
-              )}
-              {section === 'usage' && (
-                <SegmentedControl
-                  onChange={id => setUsagePeriod(Number(id) as UsagePeriod)}
-                  options={USAGE_PERIODS.map(value => ({ id: String(value), label: cc.days(value) }))}
-                  value={String(usagePeriod)}
-                />
-              )}
-            </div>
-          </header>
-
+        <OverlayMain className="px-0 pb-0">
+          {activeGroup && (
+            <OverlayBreadcrumbHeader
+              group={activeGroup}
+              rootLabel={cc.commandCenter}
+              trailing={
+                <>
+                  {section === 'sessions' && (
+                    <SearchField
+                      containerClassName="max-w-[40vw]"
+                      onChange={next => setQuery(next)}
+                      placeholder={cc.searchPlaceholder}
+                      value={query}
+                    />
+                  )}
+                  {section === 'system' && (
+                    <SearchField
+                      containerClassName="max-w-[40vw]"
+                      onChange={next => setLogQuery(next)}
+                      placeholder={cc.logSearchPlaceholder}
+                      value={logQuery}
+                    />
+                  )}
+                  {section === 'usage' && (
+                    <SegmentedControl
+                      onChange={id => setUsagePeriod(Number(id) as UsagePeriod)}
+                      options={USAGE_PERIODS.map(value => ({ id: String(value), label: cc.days(value) }))}
+                      value={String(usagePeriod)}
+                    />
+                  )}
+                </>
+              }
+            />
+          )}
+          <div className={cn('flex min-h-0 flex-1 flex-col', PAGE_INSET_X)}>
           {section === 'sessions' ? (
             <div className="min-h-0 flex-1 overflow-y-auto">
               {!sessionListHasResults ? (
@@ -534,6 +535,7 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
               </div>
             </div>
           )}
+          </div>
         </OverlayMain>
       </OverlaySplitLayout>
       {pendingDelete && (
