@@ -2073,6 +2073,10 @@ export interface Translations {
     logFile: string
     logLevel: string
     logSearchPlaceholder: string
+    logTop: string
+    logPageUp: string
+    logPageDown: string
+    logBottom: string
     maintenance: {
       runOps: string
       doctor: string
