@@ -162,7 +162,7 @@ export function LogInspector({ emptyLabel, entries, labels, loading = false, que
 
   return (
     <div className="group/logs relative flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary)">
-      <div className="absolute right-2 top-1.5 z-20 flex items-center gap-0.5 rounded-md bg-(--ui-bg-quinary)/90 p-0.5 opacity-20 shadow-sm backdrop-blur-sm transition-opacity group-hover/logs:opacity-100 focus-within:opacity-100">
+      <div className="absolute right-2 top-1.5 z-20 flex items-center gap-0.5 rounded-md bg-(--ui-bg-quinary)/90 p-0.5 opacity-80 shadow-sm backdrop-blur-sm transition-opacity group-hover/logs:opacity-100 focus-within:opacity-100">
         <NavButton label={labels.top} onClick={() => scrollTo('top')}>
           <ArrowUp className="size-3" />
         </NavButton>
@@ -216,7 +216,7 @@ export function LogInspector({ emptyLabel, entries, labels, loading = false, que
             {emptyLabel}
           </p>
         ) : (
-          <div className="min-w-max py-0.5 font-mono text-[0.6875rem] leading-[1.5] text-(--ui-text-secondary)">
+          <div className="w-full min-w-0 py-0.5 font-mono text-[0.6875rem] leading-[1.5] text-(--ui-text-secondary)">
             {entries.map(entry => {
               const severity = severityPresentation(entry)
               const SeverityIcon = severity.icon
