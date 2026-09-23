@@ -2286,7 +2286,11 @@ export const zh = defineLocale({
     actions: count => `${count} 次操作`,
     logFile: '日志文件',
     logLevel: '级别',
-    logSearchPlaceholder: '筛选日志行…',
+    logSearchPlaceholder: '搜索日志…',
+    logTop: '顶部',
+    logPageUp: '向上翻页',
+    logPageDown: '向下翻页',
+    logBottom: '底部',
     maintenance: {
       runOps: '诊断',
       doctor: '运行体检',
