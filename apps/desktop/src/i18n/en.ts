@@ -2401,7 +2401,15 @@ export const en: Translations = {
     actions: count => `${count} actions`,
     logFile: 'Log file',
     logLevel: 'Level',
-    logSearchPlaceholder: 'Filter log lines...',
+    logSearchPlaceholder: 'Search logs…',
+
+    logTop: 'Top',
+
+    logPageUp: 'Page up',
+
+    logPageDown: 'Page down',
+
+    logBottom: 'Bottom',
     maintenance: {
       runOps: 'Diagnostics',
       doctor: 'Run doctor',
