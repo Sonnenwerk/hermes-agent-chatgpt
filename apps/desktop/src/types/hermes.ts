@@ -1300,7 +1300,17 @@ export interface SessionSearchResponse {
   results: SessionSearchResult[]
 }
 
+export interface LogEntryResponse {
+  explicit_level: null | string
+  level: null | string
+  logger: null | string
+  text: string
+  timestamp: null | string
+}
+
 export interface LogsResponse {
+  /** Additive structured metadata from newer backends; older runtimes only send lines. */
+  entries?: LogEntryResponse[]
   file: string
   lines: string[]
 }
