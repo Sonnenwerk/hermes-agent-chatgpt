@@ -2402,13 +2402,9 @@ export const en: Translations = {
     logFile: 'Log file',
     logLevel: 'Level',
     logSearchPlaceholder: 'Search logs…',
-
     logTop: 'Top',
-
     logPageUp: 'Page up',
-
     logPageDown: 'Page down',
-
     logBottom: 'Bottom',
     maintenance: {
       runOps: 'Diagnostics',
