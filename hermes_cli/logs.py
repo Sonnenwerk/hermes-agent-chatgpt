@@ -94,6 +94,7 @@ def _structure_log_lines(lines: Sequence[str]) -> list[dict[str, Optional[str]]]
 
     return structured
 
+
 def _line_matches_component(line: str, prefixes: Sequence[str]) -> bool:
     name = _extract_logger_name(line)
     return name is not None and name.startswith(tuple(prefixes))
