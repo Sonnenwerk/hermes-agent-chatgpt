@@ -1,7 +1,7 @@
 import { compactNumber } from '@hermes/shared'
 import { type MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { LogTail } from '@/components/chat/log-tail'
+import { LogInspector } from '@/components/ui/log-inspector'
 import { PageLoader } from '@/components/page-loader'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -13,6 +13,7 @@ import { getActionStatus, getLogs, getStatus, getUsageAnalytics, restartGateway,
 import type { ActionStatusResponse, AnalyticsResponse, SessionInfo, StatusResponse } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { sessionTitle } from '@/lib/chat-runtime'
+import { type LogDisplayEntry, normalizeLogEntries } from '@/lib/log-lines'
 import {
   Activity,
   AlertCircle,
@@ -148,7 +149,7 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
   const [query, setQuery] = useState('')
   const [pendingDelete, setPendingDelete] = useState<SessionInfo | null>(null)
   const [status, setStatus] = useState<StatusResponse | null>(null)
-  const [logs, setLogs] = useState<string[]>([])
+  const [logEntries, setLogEntries] = useState<LogDisplayEntry[]>([])
   const [logFile, setLogFile] = useState<(typeof LOG_FILES)[number]>('agent')
   const [logLevel, setLogLevel] = useState<(typeof LOG_LEVELS)[number]>('ALL')
   const [logQuery, setLogQuery] = useState('')
@@ -194,12 +195,12 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
         getLogs({
           file: logFile,
           level: logLevel,
-          lines: 200
+          lines: 500
         })
       ])
 
       setStatus(nextStatus)
-      setLogs(nextLogs.lines)
+      setLogEntries(normalizeLogEntries(nextLogs))
     } catch (error) {
       setSystemError(error instanceof Error ? error.message : String(error))
     } finally {
@@ -253,17 +254,6 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
   })
 
   const sessionListHasResults = filteredSessions.length > 0
-
-  // Client-side substring filter over the fetched tail (matches `hermes logs --search`).
-  const visibleLogs = useMemo(() => {
-    const needle = logQuery.trim().toLowerCase()
-
-    if (!needle) {
-      return logs
-    }
-
-    return logs.filter(line => line.toLowerCase().includes(needle))
-  }, [logQuery, logs])
 
   const runSystemAction = useCallback(
     async (kind: 'restart' | 'update') => {
@@ -514,10 +504,17 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
                     </span>
                   )}
                 </div>
-                <LogTail
-                  className="flex-1 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary)"
+                <LogInspector
                   emptyLabel={cc.noLogs}
-                  lines={systemLoading && logs.length === 0 ? null : visibleLogs}
+                  entries={logEntries}
+                  labels={{
+                    bottom: cc.logBottom,
+                    pageDown: cc.logPageDown,
+                    pageUp: cc.logPageUp,
+                    top: cc.logTop
+                  }}
+                  loading={systemLoading && logEntries.length === 0}
+                  query={logQuery}
                 />
               </div>
             </div>
