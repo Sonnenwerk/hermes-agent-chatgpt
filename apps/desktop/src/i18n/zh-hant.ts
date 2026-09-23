@@ -1789,7 +1789,12 @@ export const zhHant = defineLocale({
     noModelUsage: '暫無模型使用量。',
     topSkills: '常用技能',
     noSkillActivity: '暫無技能活動。',
-    actions: count => `${count} 次動作`
+    actions: count => `${count} 次動作`,
+    logSearchPlaceholder: '搜尋日誌…',
+    logTop: '頂端',
+    logPageUp: '向上翻頁',
+    logPageDown: '向下翻頁',
+    logBottom: '底端'
   },
 
   messaging: {
