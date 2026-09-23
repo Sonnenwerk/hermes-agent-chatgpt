@@ -438,7 +438,7 @@ def create_standalone_rotating_handler(
     ``logging.backup_count``. When omitted, configured values (or the main logger
     defaults of 5 MiB and 3 backups) are used.
     """
-    _cfg_level, cfg_max_size, cfg_backup = _read_logging_config()
+    _, cfg_max_size, cfg_backup = _read_logging_config()
     resolved_max_bytes = max_bytes
     if resolved_max_bytes is None:
         resolved_max_bytes = (cfg_max_size or 5) * 1024 * 1024
