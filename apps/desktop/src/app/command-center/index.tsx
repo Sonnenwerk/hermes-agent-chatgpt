@@ -334,12 +334,13 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
 
         <OverlayMain>
           <header className="mb-4 flex items-center justify-between gap-3 max-[47.5rem]:mb-2">
+            {/* Redundant on narrow — the nav dropdown already names the section. */}
             <div className="min-w-0 max-[47.5rem]:hidden">
               <h2 className="text-[length:var(--conversation-text-font-size)] font-semibold text-foreground">
-                {cc.commandCenter}
+                {cc.sections[section]}
               </h2>
               <p className="mt-0.5 text-[length:var(--conversation-caption-font-size)] leading-(--conversation-caption-line-height) text-(--ui-text-tertiary)">
-                {cc.sections[section]} · {cc.sectionDescriptions[section]}
+                {cc.sectionDescriptions[section]}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
