@@ -3,7 +3,7 @@ import { type ReactNode, useEffect, useMemo, useRef } from 'react'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Button } from '@/components/ui/button'
 import { Tip } from '@/components/ui/tooltip'
-import { AlertCircle, AlertTriangle, ArrowUp, ChevronDown, CircleIcon, Info } from '@/lib/icons'
+import { AlertCircle, AlertTriangle, ArrowBarToDown, ArrowBarToUp, ChevronDown, CircleIcon, Info } from '@/lib/icons'
 import { type LogDisplayEntry, logEntryMatches } from '@/lib/log-lines'
 import { cn } from '@/lib/utils'
 
@@ -164,7 +164,7 @@ export function LogInspector({ emptyLabel, entries, labels, loading = false, que
     <div className="group/logs relative flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary)">
       <div className="absolute right-2 top-1.5 z-20 flex items-center gap-0.5 rounded-md bg-(--ui-bg-quinary)/90 p-0.5 opacity-80 shadow-sm backdrop-blur-sm transition-opacity group-hover/logs:opacity-100 focus-within:opacity-100">
         <NavButton label={labels.top} onClick={() => scrollTo('top')}>
-          <ArrowUp className="size-3" />
+          <ArrowBarToUp className="size-3.5" />
         </NavButton>
         <NavButton label={labels.pageUp} onClick={() => scrollTo('pageUp')}>
           <ChevronDown className="size-3 rotate-180" />
@@ -173,7 +173,7 @@ export function LogInspector({ emptyLabel, entries, labels, loading = false, que
           <ChevronDown className="size-3" />
         </NavButton>
         <NavButton label={labels.bottom} onClick={() => scrollTo('bottom')}>
-          <ArrowUp className="size-3 rotate-180" />
+          <ArrowBarToDown className="size-3.5" />
         </NavButton>
         <CopyButton
           appearance="inline"
