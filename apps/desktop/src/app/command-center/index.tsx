@@ -22,6 +22,7 @@ import {
   BookmarkFilled,
   Download,
   MessageCircle,
+  RefreshCw,
   Trash2,
   Wrench
 } from '@/lib/icons'
@@ -482,6 +483,18 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
                     {cc.recentLogs}
                   </span>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <Tip label={cc.refresh}>
+                      <Button
+                        aria-label={cc.refresh}
+                        disabled={systemLoading}
+                        onClick={() => void refreshSystem()}
+                        size="icon-xs"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <RefreshCw className={cn('size-3.5', systemLoading && 'animate-spin')} />
+                      </Button>
+                    </Tip>
                     <ResponsiveTabs
                       align="end"
                       onChange={id => setLogFile(id as (typeof LOG_FILES)[number])}
