@@ -188,13 +188,11 @@ export function SidebarWorkspaceGroup({
           }
           lead={
             <SidebarRowLead>
-              {/* Fills the lead cell like a project's icon does: the glyph's own
-                  16px would sit 2px proud of the 14px column. */}
               <ProfileGlyph
-                className="size-full"
                 color={group.color ?? null}
                 isDefault={group.id === 'default'}
                 name={group.label}
+                size="xs"
               />
             </SidebarRowLead>
           }
