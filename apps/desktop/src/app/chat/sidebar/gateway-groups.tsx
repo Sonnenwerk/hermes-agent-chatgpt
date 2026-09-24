@@ -269,10 +269,10 @@ function GatewayProfileGroup({
           >
             {group.profile ? (
               <ProfileGlyph
-                className="size-full"
                 color={group.color ?? null}
                 isDefault={group.profile === 'default'}
                 name={group.profile}
+                size="xs"
               />
             ) : (
               <Codicon name="remote" />
