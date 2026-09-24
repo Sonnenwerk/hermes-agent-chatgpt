@@ -13,16 +13,25 @@ export function ProfileGlyph({
   color,
   isDefault,
   name,
+  size = 'sm',
   ...props
 }: Omit<React.ComponentProps<'span'>, 'color'> & {
   color: null | string
   isDefault: boolean
   name: string
+  size?: 'xs' | 'sm'
 }) {
   if (isDefault) {
     return (
-      <span className={cn('grid size-4 shrink-0 place-items-center', className)} {...props}>
-        <Codicon className="text-(--ui-text-quaternary)" name="home" size="0.75rem" />
+      <span
+        className={cn('grid shrink-0 place-items-center', size === 'xs' ? 'size-3.5' : 'size-4', className)}
+        {...props}
+      >
+        <Codicon
+          className="text-(--ui-text-quaternary)"
+          name="home"
+          size={size === 'xs' ? '0.625rem' : '0.75rem'}
+        />
       </span>
     )
   }
@@ -32,7 +41,8 @@ export function ProfileGlyph({
   return (
     <span
       className={cn(
-        'grid size-4 shrink-0 place-items-center rounded-[3px] text-[0.5rem] font-semibold uppercase leading-none',
+        'grid shrink-0 place-items-center rounded-[3px] font-semibold uppercase leading-none',
+        size === 'xs' ? 'size-3.5 text-[0.4375rem]' : 'size-4 text-[0.5rem]',
         className
       )}
       style={{ backgroundColor: profileColorSoft(color ?? 'var(--ui-text-quaternary)', 22), color: color ?? undefined }}
