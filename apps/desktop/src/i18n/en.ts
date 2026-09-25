@@ -1637,7 +1637,7 @@ export const en: Translations = {
       pill: 'Search'
     },
     profileScope: {
-      appliesTo: 'Applies to',
+      appliesTo: 'Applies to profile',
       editsProfile: profile => `Changes on this page apply to the “${profile}” profile.`
     },
     mcp: {

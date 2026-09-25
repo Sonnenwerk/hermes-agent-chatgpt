@@ -1,9 +1,11 @@
 import { useStore } from '@nanostores/react'
 import { useEffect } from 'react'
 
+import { ProfileGlyph } from '@/components/ui/profile-glyph'
 import { useI18n } from '@/i18n'
+import { profileColorSoft, resolveProfileColor } from '@/lib/profile-color'
 import { cn } from '@/lib/utils'
-import { $activeGatewayProfile, $profiles, normalizeProfileKey, profileLabel, refreshProfiles } from '@/store/profile'
+import { $activeGatewayProfile, $profileColors, $profiles, normalizeProfileKey, profileLabel, refreshProfiles } from '@/store/profile'
 import {
   $settingsScopeEditsNonDefault,
   $settingsScopeOverride,
@@ -24,19 +26,37 @@ export function settingsScopeLabel(profile: Pick<ProfileInfo, 'bot_title' | 'dis
 // connection overrides (gateway-settings ScopeChip). That one stays local to
 // gateway-settings — its `null` chip means "all profiles", while here every
 // chip is a concrete profile whose config the page edits.
-export function ScopeChip({ active, label, onSelect }: { active: boolean; label: string; onSelect: () => void }) {
+export function ScopeChip({
+  active,
+  color,
+  isDefault,
+  label,
+  name,
+  onSelect
+}: {
+  active: boolean
+  color: null | string
+  isDefault: boolean
+  label: string
+  name: string
+  onSelect: () => void
+}) {
+  const identityColor = color ?? 'var(--ui-text-quaternary)'
+
   return (
     <button
       className={cn(
-        'rounded-full border px-3 py-1 text-[length:var(--conversation-caption-font-size)] transition',
+        'inline-flex items-center gap-1.5 rounded-[5px] border px-2.5 py-1 text-[length:var(--conversation-caption-font-size)] transition',
         active
-          ? 'border-(--ui-stroke-secondary) bg-(--ui-bg-tertiary) text-(--ui-text-primary)'
-          : 'border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary) text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover)'
+          ? 'border-(--ui-stroke-secondary) text-(--ui-text-primary)'
+          : 'border-(--ui-stroke-tertiary) text-(--ui-text-tertiary) hover:border-(--ui-stroke-secondary)'
       )}
       onClick={onSelect}
+      style={{ backgroundColor: profileColorSoft(identityColor, active ? 18 : 10) }}
       type="button"
     >
-      {label}
+      <ProfileGlyph aria-hidden="true" color={color} isDefault={isDefault} name={name} />
+      <span>{label}</span>
     </button>
   )
 }
@@ -54,6 +74,7 @@ export function SettingsProfileScope({ className }: { className?: string }) {
   const selected = useStore($settingsScopeProfile)
   const editingNonDefault = useStore($settingsScopeEditsNonDefault)
   const profiles = useStore($profiles)
+  const colors = useStore($profileColors)
   // The note names the edit target with the same presentation label as its
   // chip (Bot title → display_name → slug); the slug alone can name a bot the
   // user has never seen called that.
@@ -79,8 +100,11 @@ export function SettingsProfileScope({ className }: { className?: string }) {
         {profiles.map(profile => (
           <ScopeChip
             active={normalizeProfileKey(profile.name) === selected}
+            color={resolveProfileColor(profile.name, colors)}
+            isDefault={profile.is_default}
             key={profile.name}
             label={settingsScopeLabel(profile)}
+            name={profile.name}
             onSelect={() => setSettingsScope(profile.name)}
           />
         ))}
