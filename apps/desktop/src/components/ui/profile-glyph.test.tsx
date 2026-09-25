@@ -34,6 +34,20 @@ describe('ProfileGlyph', () => {
     expect(Array.from(container.children, child => child.textContent)).toEqual(expected)
   })
 
+  it('owns its compact and standard sizes in the primitive', () => {
+    const { container } = render(
+      <>
+        <ProfileGlyph color={null} isDefault={false} name="coder" size="xs" />
+        <ProfileGlyph color={null} isDefault={false} name="coder" />
+      </>
+    )
+
+    expect(container.children[0]?.className).toContain('size-3.5')
+    expect(container.children[0]?.className).toContain('text-[0.4375rem]')
+    expect(container.children[1]?.className).toContain('size-4')
+    expect(container.children[1]?.className).toContain('text-[0.5rem]')
+  })
+
   it('keeps the default profile home mark instead of using an initial', () => {
     const { container } = render(<ProfileGlyph color={null} isDefault name="研究助手" />)
 

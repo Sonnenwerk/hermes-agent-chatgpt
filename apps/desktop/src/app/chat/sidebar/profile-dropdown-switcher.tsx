@@ -192,10 +192,10 @@ export function ProfileSwitcher({ compact = false }: { compact?: boolean }) {
               ) : (
                 <ProfileGlyph
                   aria-hidden="true"
-                  className="size-3 text-[0.4375rem]"
                   color={resolveProfileColor(active.name, colors)}
                   isDefault={active.is_default}
                   name={active.name}
+                  size="xs"
                 />
               )}
               <span className="truncate">{triggerLabel}</span>
