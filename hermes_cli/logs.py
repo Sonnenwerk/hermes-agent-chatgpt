@@ -63,6 +63,38 @@ def _extract_logger_name(line: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
+def _structure_log_lines(lines: Sequence[str]) -> list[dict[str, Optional[str]]]:
+    """Project raw log lines into display metadata without changing the raw payload.
+
+    Python tracebacks and wrapped log messages usually carry a level only on their
+    first line. Continuation lines inherit that level until the next timestamped
+    record; a timestamped line without a known level resets the inherited state.
+    The desktop uses this additive metadata for accessible severity styling while
+    older clients continue to consume the raw lines unchanged.
+    """
+    structured: list[dict[str, Optional[str]]] = []
+    inherited_level: Optional[str] = None
+
+    for raw_line in lines:
+        explicit_level = _extract_level(raw_line)
+        timestamp_match = _TS_RE.match(raw_line)
+
+        if explicit_level is not None:
+            inherited_level = explicit_level
+        elif timestamp_match is not None:
+            inherited_level = None
+
+        structured.append({
+            "text": raw_line.rstrip("\r\n"),
+            "level": explicit_level or inherited_level,
+            "explicit_level": explicit_level,
+            "timestamp": timestamp_match.group(1) if timestamp_match else None,
+            "logger": _extract_logger_name(raw_line),
+        })
+
+    return structured
+
+
 def _line_matches_component(line: str, prefixes: Sequence[str]) -> bool:
     name = _extract_logger_name(line)
     return name is not None and name.startswith(tuple(prefixes))

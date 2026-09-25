@@ -1,7 +1,7 @@
 import { compactNumber } from '@hermes/shared'
 import { type MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { LogTail } from '@/components/chat/log-tail'
+import { LogInspector } from '@/components/ui/log-inspector'
 import { PageLoader } from '@/components/page-loader'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -13,6 +13,7 @@ import { getActionStatus, getLogs, getStatus, getUsageAnalytics, restartGateway,
 import type { ActionStatusResponse, AnalyticsResponse, SessionInfo, StatusResponse } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { sessionTitle } from '@/lib/chat-runtime'
+import { type LogDisplayEntry, normalizeLogEntries } from '@/lib/log-lines'
 import {
   Activity,
   AlertCircle,
@@ -21,6 +22,7 @@ import {
   BookmarkFilled,
   Download,
   MessageCircle,
+  RefreshCw,
   Trash2,
   Wrench
 } from '@/lib/icons'
@@ -35,7 +37,9 @@ import { $sessions, sessionPinId } from '@/store/session'
 import { confirmSharedGatewayRestart } from '@/store/system-actions'
 
 import { useRefreshHotkey } from '../hooks/use-refresh-hotkey'
+import { PAGE_INSET_X } from '../layout-constants'
 import { useRouteEnumParam } from '../hooks/use-route-enum-param'
+import { OverlayBreadcrumbHeader } from '../overlays/overlay-breadcrumb-header'
 import { OverlayMain, OverlayNav, OverlaySplitLayout } from '../overlays/overlay-split-layout'
 import { OverlayView } from '../overlays/overlay-view'
 
@@ -148,7 +152,7 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
   const [query, setQuery] = useState('')
   const [pendingDelete, setPendingDelete] = useState<SessionInfo | null>(null)
   const [status, setStatus] = useState<StatusResponse | null>(null)
-  const [logs, setLogs] = useState<string[]>([])
+  const [logEntries, setLogEntries] = useState<LogDisplayEntry[]>([])
   const [logFile, setLogFile] = useState<(typeof LOG_FILES)[number]>('agent')
   const [logLevel, setLogLevel] = useState<(typeof LOG_LEVELS)[number]>('ALL')
   const [logQuery, setLogQuery] = useState('')
@@ -194,12 +198,12 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
         getLogs({
           file: logFile,
           level: logLevel,
-          lines: 200
+          lines: 500
         })
       ])
 
       setStatus(nextStatus)
-      setLogs(nextLogs.lines)
+      setLogEntries(normalizeLogEntries(nextLogs))
     } catch (error) {
       setSystemError(error instanceof Error ? error.message : String(error))
     } finally {
@@ -253,17 +257,6 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
   })
 
   const sessionListHasResults = filteredSessions.length > 0
-
-  // Client-side substring filter over the fetched tail (matches `hermes logs --search`).
-  const visibleLogs = useMemo(() => {
-    const needle = logQuery.trim().toLowerCase()
-
-    if (!needle) {
-      return logs
-    }
-
-    return logs.filter(line => line.toLowerCase().includes(needle))
-  }, [logQuery, logs])
 
   const runSystemAction = useCallback(
     async (kind: 'restart' | 'update') => {
@@ -336,41 +329,48 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
     [cc, section, setSection]
   )
 
+  const activeGroup = navGroups.find(group => group.active)
+
   return (
     <OverlayView closeLabel={cc.close} onClose={onClose}>
       <OverlaySplitLayout>
         <OverlayNav groups={navGroups} />
 
-        <OverlayMain>
-          <header className="mb-4 flex items-center justify-between gap-3 max-[47.5rem]:mb-2">
-            {/* Redundant on narrow — the nav dropdown already names the section. */}
-            <div className="min-w-0 max-[47.5rem]:hidden">
-              <h2 className="text-[length:var(--conversation-text-font-size)] font-semibold text-foreground">
-                {cc.sections[section]}
-              </h2>
-              <p className="mt-0.5 text-[length:var(--conversation-caption-font-size)] leading-(--conversation-caption-line-height) text-(--ui-text-tertiary)">
-                {cc.sectionDescriptions[section]}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {section === 'sessions' && (
-                <SearchField
-                  containerClassName="max-w-[40vw]"
-                  onChange={next => setQuery(next)}
-                  placeholder={cc.searchPlaceholder}
-                  value={query}
-                />
-              )}
-              {section === 'usage' && (
-                <SegmentedControl
-                  onChange={id => setUsagePeriod(Number(id) as UsagePeriod)}
-                  options={USAGE_PERIODS.map(value => ({ id: String(value), label: cc.days(value) }))}
-                  value={String(usagePeriod)}
-                />
-              )}
-            </div>
-          </header>
-
+        <OverlayMain className="px-0 pb-0">
+          {activeGroup && (
+            <OverlayBreadcrumbHeader
+              group={activeGroup}
+              rootLabel={cc.commandCenter}
+              trailing={
+                <>
+                  {section === 'sessions' && (
+                    <SearchField
+                      containerClassName="max-w-[40vw]"
+                      onChange={next => setQuery(next)}
+                      placeholder={cc.searchPlaceholder}
+                      value={query}
+                    />
+                  )}
+                  {section === 'system' && (
+                    <SearchField
+                      containerClassName="max-w-[40vw]"
+                      onChange={next => setLogQuery(next)}
+                      placeholder={cc.logSearchPlaceholder}
+                      value={logQuery}
+                    />
+                  )}
+                  {section === 'usage' && (
+                    <SegmentedControl
+                      onChange={id => setUsagePeriod(Number(id) as UsagePeriod)}
+                      options={USAGE_PERIODS.map(value => ({ id: String(value), label: cc.days(value) }))}
+                      value={String(usagePeriod)}
+                    />
+                  )}
+                </>
+              }
+            />
+          )}
+          <div className={cn('flex min-h-0 flex-1 flex-col', PAGE_INSET_X)}>
           {section === 'sessions' ? (
             <div className="min-h-0 flex-1 overflow-y-auto">
               {!sessionListHasResults ? (
@@ -485,6 +485,18 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
                     {cc.recentLogs}
                   </span>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <Tip label={cc.refresh}>
+                      <Button
+                        aria-label={cc.refresh}
+                        disabled={systemLoading}
+                        onClick={() => void refreshSystem()}
+                        size="icon-xs"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <RefreshCw className={cn('size-3.5', systemLoading && 'animate-spin')} />
+                      </Button>
+                    </Tip>
                     <ResponsiveTabs
                       align="end"
                       onChange={id => setLogFile(id as (typeof LOG_FILES)[number])}
@@ -500,12 +512,6 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
                       }))}
                       value={logLevel}
                     />
-                    <SearchField
-                      containerClassName="w-44"
-                      onChange={next => setLogQuery(next)}
-                      placeholder={cc.logSearchPlaceholder}
-                      value={logQuery}
-                    />
                   </div>
                   {systemError && (
                     <span className="inline-flex items-center gap-1 text-[length:var(--conversation-caption-font-size)] text-destructive">
@@ -514,14 +520,22 @@ export function CommandCenterView({ initialSection, onClose, onDeleteSession, on
                     </span>
                   )}
                 </div>
-                <LogTail
-                  className="flex-1 rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary)"
+                <LogInspector
                   emptyLabel={cc.noLogs}
-                  lines={systemLoading && logs.length === 0 ? null : visibleLogs}
+                  entries={logEntries}
+                  labels={{
+                    bottom: cc.logBottom,
+                    pageDown: cc.logPageDown,
+                    pageUp: cc.logPageUp,
+                    top: cc.logTop
+                  }}
+                  loading={systemLoading && logEntries.length === 0}
+                  query={logQuery}
                 />
               </div>
             </div>
           )}
+          </div>
         </OverlayMain>
       </OverlaySplitLayout>
       {pendingDelete && (

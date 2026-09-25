@@ -1943,7 +1943,11 @@ export const ru = defineLocale({
     actions: count => `${count} ${RU_NOUN(count, 'действие', 'действия', 'действий')}`,
     logFile: 'Файл журнала',
     logLevel: 'Уровень',
-    logSearchPlaceholder: 'Фильтр строк журнала...',
+    logSearchPlaceholder: 'Поиск в журнале…',
+    logTop: 'В начало',
+    logPageUp: 'Страница вверх',
+    logPageDown: 'Страница вниз',
+    logBottom: 'В конец',
     maintenance: {
       runOps: 'Диагностика',
       doctor: 'Запустить doctor',

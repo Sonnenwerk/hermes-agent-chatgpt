@@ -1470,7 +1470,12 @@ export const ar = defineLocale({
     noModelUsage: 'لا يوجد استخدام نماذج',
     topSkills: 'أكثر المهارات استخداما',
     noSkillActivity: 'لا يوجد نشاط مهارات',
-    actions: count => `${count} إجراء`
+    actions: count => `${count} إجراء`,
+    logSearchPlaceholder: 'البحث في السجل…',
+    logTop: 'الأعلى',
+    logPageUp: 'صفحة لأعلى',
+    logPageDown: 'صفحة لأسفل',
+    logBottom: 'الأسفل'
   },
   messaging: {
     search: 'بحث',

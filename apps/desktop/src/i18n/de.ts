@@ -3151,7 +3151,11 @@ export const deOverrides = {
     actions: count => `${count} Aktionen`,
     logFile: 'Logdatei',
     logLevel: 'Stufe',
-    logSearchPlaceholder: 'Logzeilen filtern...',
+    logSearchPlaceholder: 'Logs durchsuchen…',
+    logTop: 'Zum Anfang',
+    logPageUp: 'Eine Seite nach oben',
+    logPageDown: 'Eine Seite nach unten',
+    logBottom: 'Zum Ende',
     maintenance: {
       runOps: 'Diagnose',
       doctor: 'Doctor ausführen',

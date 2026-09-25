@@ -10,6 +10,7 @@ from hermes_cli.logs import (
     _parse_line_timestamp,
     _parse_since,
     _read_last_n_lines,
+    _structure_log_lines,
 )
 
 # ---------------------------------------------------------------------------
@@ -39,6 +40,31 @@ class TestParseLineTimestamp:
 class TestExtractLevel:
     def test_info(self):
         assert _extract_level("2026-01-01 00:00:00 INFO gateway.run: msg") == "INFO"
+
+
+class TestStructureLogLines:
+    def test_traceback_lines_inherit_error_level(self):
+        entries = _structure_log_lines([
+            "2026-01-01 00:00:00 ERROR gateway.run: failed\n",
+            "Traceback (most recent call last):\n",
+            '  File "gateway.py", line 4, in run\n',
+        ])
+
+        assert [entry["level"] for entry in entries] == ["ERROR", "ERROR", "ERROR"]
+        assert entries[0]["explicit_level"] == "ERROR"
+        assert entries[1]["explicit_level"] is None
+        assert entries[0]["logger"] == "gateway.run"
+        assert entries[1]["text"] == "Traceback (most recent call last):"
+
+    def test_timestamped_unknown_record_resets_inherited_level(self):
+        entries = _structure_log_lines([
+            "2026-01-01 00:00:00 WARNING gateway.run: slow\n",
+            "continuation\n",
+            "2026-01-01 00:00:01 raw subsystem output\n",
+            "more raw output\n",
+        ])
+
+        assert [entry["level"] for entry in entries] == ["WARNING", "WARNING", None, None]
 
 # ---------------------------------------------------------------------------
 # Logger name extraction (new for component filtering)
