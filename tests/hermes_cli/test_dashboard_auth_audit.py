@@ -57,3 +57,23 @@ def test_audit_redacts_token_like_fields(profile_home):
 
 
 
+
+
+def test_audit_log_rotates_with_central_policy(profile_home, monkeypatch):
+    """The standalone JSONL audit stream must stay bounded like other Hermes logs."""
+    import hermes_logging
+
+    monkeypatch.setattr(
+        hermes_logging, "_read_logging_config", lambda: ("INFO", 1, 1)
+    )
+    payload = "x" * 700_000
+
+    audit_log(AuditEvent.LOGIN_FAILURE, reason="first", detail=payload)
+    audit_log(AuditEvent.LOGIN_FAILURE, reason="second", detail=payload)
+
+    path = profile_home / "logs" / "dashboard-auth.log"
+    rotated = profile_home / "logs" / "dashboard-auth.log.1"
+    assert path.exists()
+    assert rotated.exists()
+    assert json.loads(path.read_text())["reason"] == "second"
+    assert json.loads(rotated.read_text())["reason"] == "first"

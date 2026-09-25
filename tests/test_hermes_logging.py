@@ -821,3 +821,40 @@ class TestLineBufferPipedStdout:
         # setup_logging runs per AIAgent build: a second call must not re-flush/reconfigure.
         hermes_logging.setup_logging(hermes_home=tmp_path, force=True)
         stream.reconfigure.assert_called_once_with(line_buffering=True)
+
+
+
+
+
+class TestStandaloneRotatingHandler:
+    """Dedicated logs share the central Hermes rotation/redaction policy."""
+
+    def test_uses_configured_rotation_defaults(self, hermes_home, monkeypatch):
+        monkeypatch.setattr(
+            hermes_logging, "_read_logging_config", lambda: ("INFO", 7, 4)
+        )
+        handler = hermes_logging.create_standalone_rotating_handler(
+            hermes_home / "logs" / "standalone.log"
+        )
+        try:
+            assert handler.maxBytes == 7 * 1024 * 1024
+            assert handler.backupCount == 4
+            assert handler.level == logging.INFO
+            assert handler.formatter is not None
+        finally:
+            handler.close()
+
+    def test_explicit_rotation_overrides_config(self, hermes_home, monkeypatch):
+        monkeypatch.setattr(
+            hermes_logging, "_read_logging_config", lambda: ("INFO", 7, 4)
+        )
+        handler = hermes_logging.create_standalone_rotating_handler(
+            hermes_home / "logs" / "standalone.log",
+            max_bytes=1234,
+            backup_count=2,
+        )
+        try:
+            assert handler.maxBytes == 1234
+            assert handler.backupCount == 2
+        finally:
+            handler.close()

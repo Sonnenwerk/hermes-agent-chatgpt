@@ -56,12 +56,23 @@ def audit_log(event: AuditEvent, **fields: Any) -> None:
         "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(),
         "event": event.value,
         **{k: v for k, v in fields.items() if k not in _REDACTED_FIELDS}}
-    line = json.dumps(entry, separators=(",", ":")) + "\n"
+    line = json.dumps(entry, separators=(",", ":"))
     path = _resolve_log_path()
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with _write_lock, open(path, "a", encoding="utf-8") as f:
-            f.write(line)
+        # Keep the audit stream standalone (machine-readable JSONL, not an
+        # application-log message) while reusing Hermes bounded file policy.
+        # Construct/close per write to preserve the old append lifecycle and avoid
+        # pinning a profile log file open when HERMES_HOME changes.
+        from hermes_logging import create_standalone_rotating_handler
+        with _write_lock:
+            handler = create_standalone_rotating_handler(path)
+            try:
+                record = _log.makeRecord(
+                    _log.name, logging.INFO, __file__, 0, line, (), None
+                )
+                handler.handle(record)
+            finally:
+                handler.close()
     except Exception as e:
         _log.warning("dashboard-auth audit log write failed: %s", e)
 

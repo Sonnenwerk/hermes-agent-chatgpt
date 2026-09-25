@@ -563,6 +563,45 @@ def _new_file_handler(
     handler.setFormatter(formatter)
     return handler
 
+def create_standalone_rotating_handler(
+    path: Path,
+    *,
+    level: int = logging.INFO,
+    max_bytes: Optional[int] = None,
+    backup_count: Optional[int] = None,
+    formatter: Optional[logging.Formatter] = None,
+) -> "_ManagedRotatingFileHandler":
+    """Create a bounded standalone file handler using Hermes logging policy.
+
+    Use this for dedicated logs that intentionally do not flow through the shared
+    root QueueListener (for example JSON audit/event streams). It keeps those logs
+    on the same rotation, Windows concurrency, managed-mode permission, external
+    rotation, and redaction behavior as the main Hermes logs.
+
+    ``max_bytes`` / ``backup_count`` override ``logging.max_size_mb`` and
+    ``logging.backup_count``. When omitted, configured values (or the main logger
+    defaults of 5 MiB and 3 backups) are used.
+    """
+    _, cfg_max_size, cfg_backup = _read_logging_config()
+    resolved_max_bytes = max_bytes
+    if resolved_max_bytes is None:
+        resolved_max_bytes = (cfg_max_size or 5) * 1024 * 1024
+    resolved_backup_count = backup_count
+    if resolved_backup_count is None:
+        resolved_backup_count = cfg_backup or 3
+
+    if formatter is None:
+        from agent.redact import RedactingFormatter
+        formatter = RedactingFormatter("%(message)s")
+
+    return _new_file_handler(
+        Path(path),
+        level=level,
+        max_bytes=resolved_max_bytes,
+        backup_count=resolved_backup_count,
+        formatter=formatter,
+    )
+
 
 class _ProfileRoutingFileHandler(logging.Handler):
     """Route queued records to the log file for their Hermes home.
